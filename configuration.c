@@ -52,7 +52,7 @@ static int handler(void* p, const char* section, const char* name,
 
 
 configuration * read_cfg(char * filename) {
-	ini_parse("test.ini", handler, &cfg);
+	ini_parse(filename, handler, &cfg);
 	
 	fprintf(stderr,"H:%s P:%d C:%s V:%d\n",cfg.snmp_host,cfg.snmp_port,cfg.snmp_community,cfg.snmp_version);
 	{

@@ -105,7 +105,7 @@ int poll_n_send(configuration * xcfg) {
 
 int main(int argc , char** argvm) {
 	time_t t0=time(NULL);
-	configuration * xcfg=read_cfg("test.ini");
+	configuration * xcfg=read_cfg("snmp2carbon.ini");
 	t0=(t0/xcfg->period)*xcfg->period;
 	while (1) {
 		t0=t0+xcfg->period;
