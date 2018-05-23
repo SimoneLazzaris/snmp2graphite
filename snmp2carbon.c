@@ -3,6 +3,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <time.h>
+#include <systemd/sd-daemon.h>
 
 #include "configuration.h"
 #include "senddata.h"
@@ -115,6 +116,7 @@ int main(int argc , char** argvm) {
 	
 	configuration * xcfg=read_cfg("snmp2carbon.ini");
 	t0=(t0/xcfg->period)*xcfg->period;
+	sd_notify(0,"READY=1");
 	for(;;) {
 		t0=t0+xcfg->period;
 		poll_n_send(xcfg);
