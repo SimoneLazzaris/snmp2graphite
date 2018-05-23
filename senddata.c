@@ -10,12 +10,34 @@
 #include "configuration.h"
 #include "senddata.h"
 
+
+static void accumulate(char ** bufferptr, size_t * buffersize, char* dat) {
+	char * buffer=*bufferptr;
+	int ld=(buffer!=NULL)?strlen(buffer):0;
+	int ls=strlen(dat);
+	if (*buffersize<=ld+ls+1) {
+		while (*buffersize<=ld+ls+1)
+			*buffersize+=4096;
+		buffer=(*bufferptr)=(char*)realloc(buffer,*buffersize);
+		if (ld==0) buffer[0]=0;
+		}
+	strncat(buffer,dat,(*buffersize)-ls);
+}
+
+static void fullsend(int sock, char * buffer, int buffersize) {
+	int n=0;
+	while (n<buffersize) {
+		n+=send(sock, buffer+n, buffersize-n,0);
+	}
+}
+
 int senddata(configuration * pcfg, data2send *dat) {
 	struct sockaddr_in address;
 	int sock = 0;
 	struct sockaddr_in serv_addr={0};
-
-	char buffer[1024] = {0};
+	char *buffer=NULL;
+	size_t bufferlen=0;
+	char buffer1[1024];
 	time_t seconds;
 	
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -36,11 +58,13 @@ int senddata(configuration * pcfg, data2send *dat) {
 	seconds = time(NULL);
 
 	while (dat!=NULL) {
-		snprintf(buffer,1024,"%s %u %u\n",dat->metric, dat->value, seconds);
-		send(sock , buffer , strlen(buffer) , MSG_MORE );
+		snprintf(buffer1,1024,"%s %u %u\n",dat->metric, dat->value, seconds);
+		accumulate(&buffer,&bufferlen, buffer1);
 		dat=dat->next;
-	}	
-	send(sock , buffer , 0,0);
+	}
+	accumulate(&buffer,&bufferlen, "\n");
+	fullsend(sock, buffer, strlen(buffer));
+	free(buffer);
 	close(sock);
 	return 0;
 }
