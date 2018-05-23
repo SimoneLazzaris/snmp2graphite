@@ -14,7 +14,7 @@ struct snmp_session * init(struct snmp_session *session, configuration * cfg) {
 	hostlen=1+snprintf(NULL,0,"%s:%d",cfg->snmp_host,cfg->snmp_port);
 	hostbuffer=(char*)malloc(hostlen);
 	snprintf(hostbuffer,hostlen,"%s:%d",cfg->snmp_host,cfg->snmp_port);
-	printf("host %s\n",hostbuffer);
+	
 	init_snmp("test");
 	snmp_sess_init( session );
 	session->peername = hostbuffer;//cfg->snmp_host;
@@ -90,7 +90,7 @@ int poll_n_send(configuration * xcfg) {
 				(*pdat)->value=vars->val.counter64->high;
 				(*pdat)->next=NULL;
 				pdat=&((*pdat)->next);
-				printf("- %s : %u\n",ol->name,vars->val.counter64->high);
+				// printf("- %s : %u\n",ol->name,vars->val.counter64->high);
 			}
 		}
 	}
@@ -112,9 +112,10 @@ int poll_n_send(configuration * xcfg) {
 
 int main(int argc , char** argvm) {
 	time_t t0=time(NULL);
+	
 	configuration * xcfg=read_cfg("snmp2carbon.ini");
 	t0=(t0/xcfg->period)*xcfg->period;
-	while (1) {
+	for(;;) {
 		t0=t0+xcfg->period;
 		poll_n_send(xcfg);
 		sleep(t0-time(NULL));
