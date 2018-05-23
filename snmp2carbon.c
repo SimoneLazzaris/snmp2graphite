@@ -8,10 +8,16 @@
 #include "senddata.h"
 
 struct snmp_session * init(struct snmp_session *session, configuration * cfg) {
+	char * hostbuffer;
+	size_t hostlen;
 	struct snmp_session *ss;
+	hostlen=1+snprintf(NULL,0,"%s:%d",cfg->snmp_host,cfg->snmp_port);
+	hostbuffer=(char*)malloc(hostlen);
+	snprintf(hostbuffer,hostlen,"%s:%d",cfg->snmp_host,cfg->snmp_port);
+	printf("host %s\n",hostbuffer);
 	init_snmp("test");
 	snmp_sess_init( session );
-	session->peername = cfg->snmp_host;
+	session->peername = hostbuffer;//cfg->snmp_host;
 	switch (cfg->snmp_version) {
 		case 1:	session->version = SNMP_VERSION_1;
 			break;
@@ -29,7 +35,8 @@ struct snmp_session * init(struct snmp_session *session, configuration * cfg) {
 		snmp_log(LOG_ERR, "something horrible happened!!!\n");
 		exit(2);
 		}
-
+	free(session->peername);
+	session->peername=NULL;
 	return ss;
 }
 
