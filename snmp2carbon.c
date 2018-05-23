@@ -84,7 +84,7 @@ int poll_n_send(configuration * xcfg) {
 	status = snmp_synch_response(ss, pdu, &response);
 	if (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR) {
 		for(vars = response->variables; vars; vars = vars->next_variable) {
-			print_variable(vars->name, vars->name_length, vars);
+			// print_variable(vars->name, vars->name_length, vars);
 			ol=oidfind(xcfg, vars->name_loc, vars->name_length);
 			if (ol) {
 				(*pdat)=(data2send*)malloc(sizeof(data2send));
