@@ -66,7 +66,7 @@ int poll_n_send(configuration * xcfg) {
 	struct snmp_pdu *response;
 		
 	oid anOID[MAX_OID_LEN];
-	size_t anOID_len = MAX_OID_LEN;
+	size_t anOID_len;
 
 	struct variable_list *vars;
 	int status;
@@ -77,6 +77,7 @@ int poll_n_send(configuration * xcfg) {
 	ss=init(&session,xcfg);
 	pdu = snmp_pdu_create(SNMP_MSG_GET);
 	for (ol=xcfg->oidlist; ol!=NULL; ol=ol->next) {
+		anOID_len = MAX_OID_LEN;
 		read_objid(ol->oid, anOID, &anOID_len);
 		snmp_add_null_var(pdu, anOID, anOID_len);
 	}
@@ -114,8 +115,10 @@ int poll_n_send(configuration * xcfg) {
 
 int main(int argc , char** argvm) {
 	time_t t0=time(NULL);
-	
-	configuration * xcfg=read_cfg("snmp2carbon.ini");
+	char *cfgfile="snmp2carbon.ini";
+	if (argc>1)
+		cfgfile=argvm[1];
+	configuration * xcfg=read_cfg(cfgfile);
 	t0=(t0/xcfg->period)*xcfg->period;
 	#ifdef USE_SYSTEMD
 	sd_notify(0,"READY=1");
